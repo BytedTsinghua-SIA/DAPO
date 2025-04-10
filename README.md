@@ -44,7 +44,7 @@ We provide the model weights of [DAPO-Qwen-32B](https://huggingface.co/BytedTsin
 
 ### Environment Setup
 
-We recommend using conda to setup the environment.
+We recommend using conda to setup the environment:
 
 ```bash
 conda create -n dapo python=3.10
