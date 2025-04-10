@@ -5,7 +5,7 @@
 [![Paper](https://img.shields.io/badge/paper-5f16a8?style=for-the-badge&logo=arxiv&logoColor=white)](https://arxiv.org/pdf/2503.14476)
 [![Blog](https://img.shields.io/badge/Blog-3858bf?style=for-the-badge&logo=homepage&logoColor=white)](https://DAPO-SIA.github.io/)
 [![Dataset](https://img.shields.io/badge/Datasets-4d8cd8?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/datasets/BytedTsinghua-SIA/DAPO-Math-17k)
-[![Weights](https://img.shields.io/badge/Model%20Weights(coming%20soon)-63cad3?style=for-the-badge&logo=huggingface&logoColor=white)](https://github.com/BytedTsinghua-SIA/DAPO)
+[![Weights](https://img.shields.io/badge/Model%20Weights-63cad3?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B)
 <!-- [![Thread](https://img.shields.io/badge/Thread-91ded6?style=for-the-badge&logo=x&logoColor=white)](https://github.com/BytedTsinghua-SIA/DAPO) -->
 </div>
 
@@ -61,6 +61,60 @@ Note:
 - The `DAPO w/o Token-level PG Loss & Dynamic Sampling -- AIME 44` script has been verified on the current verl and achieves 44 points on AIME, whose training record can be accessed in [wandb](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=u7n2j5sht28).
 
 - The final performance of DAPO (50 on AIME) is achieved using the full DAPO algorithm based on our internal codebase, which includes heavy engineering optimization code based on verl. The `DAPO Full` script provides the command to run the full DAPO algorithm. But we still have not verified it on verl.
+
+### Model & Inference
+
+We provide the model weights of [DAPO-Qwen-32B](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B), which is trained based on Qwen2.5-32B using DAPO algorithm.
+
+Here is an example of model inference code:
+
+```python
+import torch
+from vllm import SamplingParams, LLM
+
+examples = [
+    {
+        "prompt": "A conversation between user and assistant. The user asks a question, and the assistant solves it. The time limit is set to 20,480 tokens. If the assistant's response exceeds this limit, a progressively increasing penalty with the number of tokens exceeded will be applied.\nuser\nSolve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\nAmong the 900 residents of Aimeville, there are 195 who own a diamond ring, 367 who own a set of golf clubs, and 562 who own a garden spade. In addition, each of the 900 residents owns a bag of candy hearts. There are 437 residents who own exactly two of these things, and 234 residents who own exactly three of these things. Find the number of residents of Aimeville who own all four of these things.\nRemember to put your answer on its own line after \"Answer:\".\nassistant",
+        "answer": "73"
+    },
+    {
+        "prompt": "A conversation between user and assistant. The user asks a question, and the assistant solves it. The time limit is set to 20,480 tokens. If the assistant's response exceeds this limit, a progressively increasing penalty with the number of tokens exceeded will be applied.\nuser\nSolve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\nConsider the paths of length $16$ that follow the lines from the lower left corner to the upper right corner on an $8\times 8$ grid. Find the number of such paths that change direction exactly four times, as in the examples shown below.\nRemember to put your answer on its own line after \"Answer:\".\nassistant",
+        "answer": "294"
+    },
+    {
+        "prompt": "A conversation between user and assistant. The user asks a question, and the assistant solves it. The time limit is set to 20,480 tokens. If the assistant's response exceeds this limit, a progressively increasing penalty with the number of tokens exceeded will be applied.\nuser\nSolve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\n\nA list of positive integers has the following properties:\n$\\bullet$ The sum of the items in the list is $30$.\n$\\bullet$ The unique mode of the list is $9$.\n$\\bullet$ The median of the list is a positive integer that does not appear in the list itself.\nFind the sum of the squares of all the items in the list.\nRemember to put your answer on its own line after \"Answer:\".\nassistant",
+        "answer": "236"
+    }
+]
+
+
+def main():
+    model = "BytedTsinghua-SIA/DAPO-Qwen-32B"
+
+    llm = LLM(
+        model=model,
+        dtype=torch.bfloat16,
+        tensor_parallel_size=8,
+        gpu_memory_utilization=0.95
+    )
+
+    sampling_params = SamplingParams(
+        temperature=1.0,
+        top_p=0.7,
+        max_tokens=32768
+    )
+
+    for example in examples:
+        prompt = example["prompt"]
+        answer = example["answer"]
+        output = llm.generate(prompt, sampling_params)
+        print(f"***QUESTION***:\n{prompt}\n***GROUND TRUTH***:\n{answer}\n***MODEL OUTPUT***:\n{output[0].outputs[0].text}\n")
+        print("-"*100)
+
+if __name__ == "__main__":
+    main()
+
+```
 
 ## Acknowledgement
 
