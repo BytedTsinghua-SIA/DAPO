@@ -40,7 +40,7 @@ Through open-sourcing, we provide the broader research community and society wit
 
 ## Model Use
 
-We provide the model weights of [DAPO-Qwen-32B](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B), which is trained based on Qwen2.5-32B using DAPO algorithm.
+We provide the model weights of [DAPO-Qwen-32B](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B), which is trained based on Qwen2.5-32B using the DAPO algorithm.
 
 ### Environment Setup
 
@@ -53,7 +53,8 @@ pip3 install vllm==0.8.2
 ```
 
 ### Inference
-Here is an example of model inference code:
+
+We provide the model inference code here:
 
 ```python
 import torch
