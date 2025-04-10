@@ -38,10 +38,21 @@ Through open-sourcing, we provide the broader research community and society wit
 
 ![alt text](img/dynamic.png)
 
-## Model & Inference
+## Model Use
 
 We provide the model weights of [DAPO-Qwen-32B](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B), which is trained based on Qwen2.5-32B using DAPO algorithm.
 
+### Environment Setup
+
+We recommend using conda to setup the environment.
+
+```bash
+conda create -n dapo python=3.10
+conda activate dapo
+pip3 install vllm==0.8.2
+```
+
+### Inference
 Here is an example of model inference code:
 
 ```python
