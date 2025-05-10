@@ -11,6 +11,7 @@
 
 > [!IMPORTANT]
 > **🔥 News!!!**
+> - [2025/05] We update the [wandb training record](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=wmb4qxfht0n) of full DAPO and the [converged checkpoint](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B), which achieved 50%+ on AIME 2024.
 > - [2025/03] We release the training record of an early version of DAPO (w/o Token-level PG Loss & Dynamic Sampling), achieving 44% on AIME 2024, in [wandb](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=u7n2j5sht28).
 
 We release a fully open-sourced system for large-scale LLM RL, including algorithm, code infrastructure, and dataset. The system achieves state-of-the-art large-scale LLM RL performance. We propose the **D**ecoupled Clip and **D**ynamic s**A**mpling **P**olicy **O**ptimization (**DAPO**) algorithm.
@@ -58,26 +59,29 @@ We provide the model inference code here:
 
 ```python
 import torch
+from transformers import AutoTokenizer
 from vllm import SamplingParams, LLM
 
 examples = [
     {
-        "prompt": "A conversation between user and assistant. The user asks a question, and the assistant solves it. The time limit is set to 20,480 tokens. If the assistant's response exceeds this limit, a progressively increasing penalty with the number of tokens exceeded will be applied.\nuser\nSolve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\nAmong the 900 residents of Aimeville, there are 195 who own a diamond ring, 367 who own a set of golf clubs, and 562 who own a garden spade. In addition, each of the 900 residents owns a bag of candy hearts. There are 437 residents who own exactly two of these things, and 234 residents who own exactly three of these things. Find the number of residents of Aimeville who own all four of these things.\nRemember to put your answer on its own line after \"Answer:\".\nassistant",
-        "answer": "73"
+        "question": "Solve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\n\nFind the largest possible real part of \\[(75+117i)z+\\frac{96+144i}{z}\\]where $z$ is a complex number with $|z|=4$.\n\nRemember to put your answer on its own line after \"Answer:\".",
+        "answer": "540"
     },
     {
-        "prompt": "A conversation between user and assistant. The user asks a question, and the assistant solves it. The time limit is set to 20,480 tokens. If the assistant's response exceeds this limit, a progressively increasing penalty with the number of tokens exceeded will be applied.\nuser\nSolve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\nConsider the paths of length $16$ that follow the lines from the lower left corner to the upper right corner on an $8\times 8$ grid. Find the number of such paths that change direction exactly four times, as in the examples shown below.\nRemember to put your answer on its own line after \"Answer:\".\nassistant",
-        "answer": "294"
+        "question": "Solve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\n\nEvery morning Aya goes for a $9$-kilometer-long walk and stops at a coffee shop afterwards. When she walks at a constant speed of $s$ kilometers per hour, the walk takes her 4 hours, including $t$ minutes spent in the coffee shop. When she walks $s+2$ kilometers per hour, the walk takes her 2 hours and 24 minutes, including $t$ minutes spent in the coffee shop. Suppose Aya walks at $s+\\frac{1}{2}$ kilometers per hour. Find the number of minutes the walk takes her, including the $t$ minutes spent in the coffee shop.\n\nRemember to put your answer on its own line after \"Answer:\".",
+        "answer": "204"
     },
     {
-        "prompt": "A conversation between user and assistant. The user asks a question, and the assistant solves it. The time limit is set to 20,480 tokens. If the assistant's response exceeds this limit, a progressively increasing penalty with the number of tokens exceeded will be applied.\nuser\nSolve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\n\nA list of positive integers has the following properties:\n$\\bullet$ The sum of the items in the list is $30$.\n$\\bullet$ The unique mode of the list is $9$.\n$\\bullet$ The median of the list is a positive integer that does not appear in the list itself.\nFind the sum of the squares of all the items in the list.\nRemember to put your answer on its own line after \"Answer:\".\nassistant",
-        "answer": "236"
+        "question": "Solve the following math problem step by step. The last line of your response should be of the form Answer: $Answer (without quotes) where $Answer is the answer to the problem.\n\nLet $\\mathcal{B}$ be the set of rectangular boxes with surface area $54$ and volume $23$. Let $r$ be the radius of the smallest sphere that can contain each of the rectangular boxes that are elements of $\\mathcal{B}$. The value of $r^2$ can be written as $\\frac{p}{q}$, where $p$ and $q$ are relatively prime positive integers. Find $p+q$.\n\nRemember to put your answer on its own line after \"Answer:\".",
+        "answer": "721"
     }
 ]
 
 
 def main():
     model = "BytedTsinghua-SIA/DAPO-Qwen-32B"
+
+    tokenzier = AutoTokenizer.from_pretrained(model)
 
     llm = LLM(
         model=model,
@@ -89,19 +93,23 @@ def main():
     sampling_params = SamplingParams(
         temperature=1.0,
         top_p=0.7,
-        max_tokens=32768
+        max_tokens=20480
     )
 
     for example in examples:
-        prompt = example["prompt"]
+        question = example["question"]
         answer = example["answer"]
-        output = llm.generate(prompt, sampling_params)
-        print(f"***QUESTION***:\n{prompt}\n***GROUND TRUTH***:\n{answer}\n***MODEL OUTPUT***:\n{output[0].outputs[0].text}\n")
+        output = llm.generate(
+                    prompts=tokenzier.apply_chat_template(conversation=[{"content": question, "role": "user"}],
+                                                          add_generation_prompt=True,
+                                                          tokenize=False),
+                    sampling_params=sampling_params
+                )
+        print(f"***QUESTION***:\n{question}\n***GROUND TRUTH***:\n{answer}\n***MODEL OUTPUT***:\n{output[0].outputs[0].text}\n")
         print("-"*100)
 
 if __name__ == "__main__":
     main()
-
 ```
 
 ## Reproducibility
