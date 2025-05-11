@@ -1,0 +1,6 @@
+openai
+pandas
+pyarrow
+httpx==0.23.1
+ray[serve]
+vllm==0.8.3
