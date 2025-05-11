@@ -11,7 +11,7 @@
 
 > [!IMPORTANT]
 > **🔥 News!!!**
-> - [2025/05] We update the [wandb training record](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=wmb4qxfht0n) of full DAPO and the [converged checkpoint](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B), which achieved 50%+ on AIME 2024.
+> - [2025/05] We update the [wandb training record](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=wmb4qxfht0n) of full DAPO and the [checkpoint](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B) which achieved 50%+ on AIME 2024.
 > - [2025/03] We release the training record of an early version of DAPO (w/o Token-level PG Loss & Dynamic Sampling), achieving 44% on AIME 2024, in [wandb](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=u7n2j5sht28).
 
 We release a fully open-sourced system for large-scale LLM RL, including algorithm, code infrastructure, and dataset. The system achieves state-of-the-art large-scale LLM RL performance. We propose the **D**ecoupled Clip and **D**ynamic s**A**mpling **P**olicy **O**ptimization (**DAPO**) algorithm.
@@ -50,7 +50,7 @@ We recommend using conda to setup the environment:
 ```bash
 conda create -n dapo python=3.10
 conda activate dapo
-pip3 install vllm==0.8.2
+pip3 install -r requirements.txt
 ```
 
 ### Inference
@@ -110,6 +110,28 @@ def main():
 
 if __name__ == "__main__":
     main()
+```
+
+### Evaluation on AIME 2024
+
+To evaluate the model on AIME 2024, we deploy DAPO-Qwen-32B with Ray Serve and vLLM.
+
+To load the model from Huggingface:
+
+```bash
+serve run eval.llm:build_app model=BytedTsinghua-SIA/DAPO-Qwen-32B tensor-parallel-size=8
+
+# open another terminal
+python eval/eval_aime24.py --temperature 1.0 --top_p 0.7 --max_tokens 20480 --model BytedTsinghua-SIA/DAPO-Qwen-32B --test_file eval/aime-2024.parquet
+```
+
+To load the model from local path:
+
+```bash
+serve run eval.llm:build_app model=aaa/bbb/ccc tensor-parallel-size=8
+
+# open another terminal
+python eval/eval_aime24.py --temperature 1.0 --top_p 0.7 --max_tokens 20480 --model ccc --test_file eval/aime-2024.parquet
 ```
 
 ## Reproducibility
