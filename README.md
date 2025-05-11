@@ -11,7 +11,7 @@
 
 > [!IMPORTANT]
 > **🔥 News!!!**
-> - [2025/05] We update the [wandb training record](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=wmb4qxfht0n) of full DAPO and the [checkpoint](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B) which achieved 50%+ on AIME 2024.
+> - [2025/05] We update the [wandb training record](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=wmb4qxfht0n) of full DAPO and the [checkpoint](https://huggingface.co/BytedTsinghua-SIA/DAPO-Qwen-32B) which achieved 50%+ on AIME 2024. We also provide [scripts](eval/) for evaluation on AIME 2024.
 > - [2025/03] We release the training record of an early version of DAPO (w/o Token-level PG Loss & Dynamic Sampling), achieving 44% on AIME 2024, in [wandb](https://wandb.ai/verl-org/DAPO%20Reproduction%20on%20verl?nw=u7n2j5sht28).
 
 We release a fully open-sourced system for large-scale LLM RL, including algorithm, code infrastructure, and dataset. The system achieves state-of-the-art large-scale LLM RL performance. We propose the **D**ecoupled Clip and **D**ynamic s**A**mpling **P**olicy **O**ptimization (**DAPO**) algorithm.
